@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Maze Runner - Advanced</title>
+</head>
+<body style="background:rgb(0, 0, 0); color:white; text-align:center;">
+
+<h1>🏃 Maze Runner</h1>
+<p>Use Arrow Keys to reach the green box</p>
+
+<canvas id="game" width="400" height="400"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const size = 40;
+
+// 0 = path, 1 = wall, 2 = goal
+const maze = [
+ [0,1,0,0,0,1,0,0,0,0],
+ [0,1,0,1,0,1,0,1,1,0],
+ [0,0,0,1,0,0,0,1,0,0],
+ [1,1,0,1,1,1,0,1,0,1],
+ [0,0,0,0,0,1,0,0,0,1],
+ [0,1,1,1,0,1,1,1,0,1],
+ [0,1,0,0,0,0,0,1,0,0],
+ [0,1,0,1,1,1,0,1,1,0],
+ [0,0,0,1,0,0,0,0,0,0],
+ [1,1,0,0,0,1,1,1,1,2]
+];
+
+let player = {x:0, y:0};
+let won = false;
+
+function draw() {
+  ctx.clearRect(0,0,400,400);
+
+  for (let y=0; y<10; y++) {
+    for (let x=0; x<10; x++) {
+
+      let color = "white";
+      if (maze[y][x] === 1) color = "gray";
+      if (maze[y][x] === 2) color = "green";
+
+      if (player.x === x && player.y === y) color = "blue";
+
+      ctx.fillStyle = color;
+      ctx.fillRect(x*size, y*size, size, size);
+
+      ctx.strokeStyle = "black";
+      ctx.strokeRect(x*size, y*size, size, size);
+    }
+  }
+
+  if (won) {
+    ctx.fillStyle = "lime";
+    ctx.font = "24px Arial";
+    ctx.fillText("You Escaped!", 110, 200);
+  }
+}
+
+document.addEventListener("keydown", function(e) {
+  if (won) return;
+
+  let nx = player.x;
+  let ny = player.y;
+
+  if (e.key === "ArrowUp") ny--;
+  if (e.key === "ArrowDown") ny++;
+  if (e.key === "ArrowLeft") nx--;
+  if (e.key === "ArrowRight") nx++;
+
+  if (nx>=0 && nx<10 && ny>=0 && ny<10 && maze[ny][nx] !== 1) {
+    player.x = nx;
+    player.y = ny;
+
+    if (maze[ny][nx] === 2) {
+      won = true;
+    }
+  }
+
+  draw();
+});
+
+draw();
+</script>
+
+</body>
+</html>

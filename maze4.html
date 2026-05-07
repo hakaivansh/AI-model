@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Maze Runner Game</title>
+  <style>
+    body { font-family: Arial; text-align: center; background: #f5f5f5; }
+    #maze { display: grid; grid-template-columns: repeat(10, 40px); margin: 20px auto; }
+    .cell { width: 40px; height: 40px; border: 1px solid #ccc; }
+    .wall { background: black; }
+    .player { background: blue; }
+    .goal { background: green; }
+    button { padding: 10px 20px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<h1>Maze Runner 🏃‍♂️</h1>
+<p>Reach the green box using arrow keys</p>
+
+<div id="maze"></div>
+<p id="status"></p>
+<button onclick="initGame()">Restart</button>
+
+<script>
+const rows = 10, cols = 10;
+let maze, playerPos, goalPos;
+
+function initGame() {
+  maze = [];
+  playerPos = { r: 0, c: 0 };
+  goalPos = { r: rows - 1, c: cols - 1 };
+
+  // Create empty maze
+  for (let r = 0; r < rows; r++) {
+    maze[r] = [];
+    for (let c = 0; c < cols; c++) {
+      maze[r][c] = "path";
+    }
+  }
+
+  // Add random walls but keep a path open
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      if (!(r === 0 && c === 0) && !(r === goalPos.r && c === goalPos.c)) {
+        if (Math.random() < 0.25) maze[r][c] = "wall";
+      }
+    }
+  }
+
+  // Force a path (simple guaranteed path)
+  for (let i = 0; i < rows; i++) {
+    maze[i][0] = "path";
+  }
+  for (let i = 0; i < cols; i++) {
+    maze[rows-1][i] = "path";
+  }
+
+  maze[0][0] = "player";
+  maze[goalPos.r][goalPos.c] = "goal";
+
+  document.getElementById("status").textContent = "";
+  drawMaze();
+}
+
+const mazeDiv = document.getElementById("maze");
+
+function drawMaze() {
+  mazeDiv.innerHTML = "";
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+
+      if (maze[r][c] === "wall") cell.classList.add("wall");
+      if (maze[r][c] === "player") cell.classList.add("player");
+      if (maze[r][c] === "goal") cell.classList.add("goal");
+
+      mazeDiv.appendChild(cell);
+    }
+  }
+}
+
+function movePlayer(dr, dc) {
+  const newR = playerPos.r + dr;
+  const newC = playerPos.c + dc;
+
+  if (newR < 0 || newR >= rows || newC < 0 || newC >= cols) return;
+  if (maze[newR][newC] === "wall") return;
+
+  maze[playerPos.r][playerPos.c] = "path";
+  playerPos = { r: newR, c: newC };
+
+  if (playerPos.r === goalPos.r && playerPos.c === goalPos.c) {
+    document.getElementById("status").textContent = "🎉 You escaped!";
+  }
+
+  maze[playerPos.r][playerPos.c] = "player";
+  drawMaze();
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowUp") movePlayer(-1, 0);
+  if (e.key === "ArrowDown") movePlayer(1, 0);
+  if (e.key === "ArrowLeft") movePlayer(0, -1);
+  if (e.key === "ArrowRight") movePlayer(0, 1);
+});
+
+initGame();
+</script>
+
+</body>
+</html>

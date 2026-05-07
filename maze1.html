@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title><b>Maze Runner Advanced</b>></title>
+
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+  background: #f0f0f0;
+}
+
+#maze {
+  display: grid;
+  grid-template-columns: repeat(10, 40px);
+  margin: 20px auto;
+}
+
+.cell {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ccc;
+}
+
+.wall { background: black; }
+.player { background: blue; }
+.goal { background: green; }
+
+#info {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+button {
+  padding: 9px 15px;
+  margin: 7px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Maze Runner 🏃‍♂️</h1>
+<p>Reach the green box to advance levels</p>
+
+<div id="info">
+  Level: <span id="level">1</span> |
+  Score: <span id="score">0</span>
+</div>
+
+<div id="maze"></div>
+
+<p id="status"></p>
+
+<button onclick="restartGame()">Restart Game</button>
+
+<script>
+const rows = 10, cols = 10;
+let maze, playerPos, goalPos;
+let level = 1;
+let score = 0;
+
+function initGame() {
+  maze = [];
+  playerPos = { r: 0, c: 0 };
+  goalPos = { r: rows - 1, c: cols - 1 };
+
+  let wallDensity = 0.15 + (level * 0.05); // difficulty increases
+
+  // create grid
+  for (let r = 0; r < rows; r++) {
+    maze[r] = [];
+    for (let c = 0; c < cols; c++) {
+      maze[r][c] = Math.random() < wallDensity ? "wall" : "path";
+    }
+  }
+
+  // ensure start & goal clear
+  maze[0][0] = "player";
+  maze[goalPos.r][goalPos.c] = "goal";
+
+  // force a guaranteed path
+  for (let i = 0; i < rows; i++) maze[i][0] = "path";
+  for (let i = 0; i < cols; i++) maze[rows-1][i] = "path";
+
+  maze[0][0] = "player";
+  maze[goalPos.r][goalPos.c] = "goal";
+
+  document.getElementById("status").textContent = "";
+  updateInfo();
+  drawMaze();
+}
+
+function drawMaze() {
+  const mazeDiv = document.getElementById("maze");
+  mazeDiv.innerHTML = "";
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+
+      if (maze[r][c] === "wall") cell.classList.add("wall");
+      if (maze[r][c] === "player") cell.classList.add("player");
+      if (maze[r][c] === "goal") cell.classList.add("goal");
+
+      mazeDiv.appendChild(cell);
+    }
+  }
+}
+
+function movePlayer(dr, dc) {
+  const newR = playerPos.r + dr;
+  const newC = playerPos.c + dc;
+
+  if (newR < 0 || newR >= rows || newC < 0 || newC >= cols) return;
+  if (maze[newR][newC] === "wall") return;
+
+  maze[playerPos.r][playerPos.c] = "path";
+  playerPos = { r: newR, c: newC };
+
+  if (playerPos.r === goalPos.r && playerPos.c === goalPos.c) {
+    score += 10 * level;
+    level++;
+    document.getElementById("status").textContent = "🎉 Level Complete!";
+    
+    setTimeout(() => {
+      initGame();
+    }, 800);
+  }
+
+  maze[playerPos.r][playerPos.c] = "player";
+  drawMaze();
+}
+
+function updateInfo() {
+  document.getElementById("level").textContent = level;
+  document.getElementById("score").textContent = score;
+}
+
+function restartGame() {
+  level = 1;
+  score = 0;
+  initGame();
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowUp") movePlayer(-1, 0);
+  if (e.key === "ArrowDown") movePlayer(1, 0);
+  if (e.key === "ArrowLeft") movePlayer(0, -1);
+  if (e.key === "ArrowRight") movePlayer(0, 1);
+});
+
+initGame();
+</script>
+
+</body>
+</html>
